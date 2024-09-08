@@ -18,9 +18,7 @@ impl FileInput {
             _ => Err(format!("Invalid file_input '{}', use one of 'test1', 'test2', 'prod1', 'prod2'", file_input)),
         }
     }
-}
 
-impl FileInput {
     pub fn file_name(&self) -> &'static str {
         match self {
             Self::Test1 => "test1.txt",
@@ -32,7 +30,6 @@ impl FileInput {
 }
 
 
-// pub fn parse_arguments() -> (String, String, Input) {
 pub fn parse_arguments() -> Result<(String, String, FileInput), String> {
     let args: Vec<String> = env::args().collect();
 
