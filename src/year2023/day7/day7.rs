@@ -1,11 +1,10 @@
 use std::collections::HashMap;
-
-
 use crate::utils::{file, solution::{Solution, SolutionPair}};
 
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone)]
 enum Card {
+    Jack, // for part 2, move back to its original pos for part1
     Two,
     Three,
     Four,
@@ -15,7 +14,6 @@ enum Card {
     Eight,
     Nine,
     Ten,
-    Jack,
     Queen,
     King,
     Ace,
@@ -43,7 +41,6 @@ impl Card {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum Hand {
-    // HighCard(Card),
     HighCard,
     SinglePair,
     DoublePair,
@@ -51,6 +48,19 @@ enum Hand {
     FullHouse,
     FourOfAKind,
     FiveOfAKind,
+}
+
+
+fn jacks_count(counts: &Vec<(Card, u32)>, idx: usize) -> usize {
+    let jacks_slice = counts[idx..].iter().filter_map(|(card, _)| {
+        if *card == Card::Jack {
+            Some(*card)
+        } else {
+            None
+        }
+    }).collect::<Vec<Card>>().len();
+
+    jacks_slice
 }
 
 impl Hand {
@@ -65,28 +75,51 @@ impl Hand {
                 count_cmp
             }
         });
+        let jack_slice =   &counts[1..].iter().filter_map(|(card, _)| {
+            if *card == Card::Jack {
+                Some(*card)
+            } else {
+                None
+            }
+        }).collect::<Vec<_>>();
+        // NOTE: For part2, need to check whether the J is part of the current combo or not, to
+        // update the hand accordingly
 
         if counts[0].1 == 5 {
             return (Self::FiveOfAKind, hand);
 
         } else if counts[0].1 == 4 {
-            return (Self::FourOfAKind, hand);
+            // [4,1] case
+            // If we find even 1 J (doesnt matter if because we have 4J or 1 J), it means that we have a 5 of a kind
+            if jacks_count(&counts, 0) > 0 { return (Self::FiveOfAKind, hand) }
+            else {(Self::FourOfAKind, hand)}
 
         } else if counts[0].1 == 3 && counts[1].1 == 2 {
-            return (Self::FullHouse, hand);
+            // [3,2] case. If either of them are J's, we get a 5 kind
+            if jacks_count(&counts, 0) > 0 { return (Self::FiveOfAKind, hand) }
+            else {(Self::FullHouse, hand)}
 
         } else if counts[0].1 == 3  {
-            return (Self::ThreeOfAKind, hand);
+            // [3,1,1] case
+            if jacks_count(&counts, 0) > 0 {return (Self::FourOfAKind, hand)}
+            else {return (Self::ThreeOfAKind, hand)}
 
         } else if counts[0].1 == 2 && counts[1].1 == 2 {
-            return (Self::DoublePair, hand);
+            // [2,2,1]
+            // possibilities:
+            //     : from double to poker: either of the doubles is J [KK,JJ,10] -> [KK, KK, 10]
+            //     : from double to full house: the last card is a J  -> [KK, QQ, J]
+            if counts[0].0 == Card::Jack || counts[1].0 == Card::Jack { return (Self::FourOfAKind, hand)}
+            else if counts[2].0 == Card::Jack { return (Self::FullHouse, hand)}
+            else { return (Self::DoublePair, hand)}
 
         } else if counts[0].1 == 2 {
-            return (Self::SinglePair, hand);
+            if jacks_count(&counts, 0) > 0 { return (Self::ThreeOfAKind, hand)}
+            else { return (Self::SinglePair, hand)}
 
         } else {
-            let max_card = hand.clone().into_iter().min().unwrap();
-            return (Self::HighCard, hand);
+            if jacks_count(&counts, 0) > 0 {return (Self::SinglePair, hand)}
+            else {return (Self::HighCard, hand)};
         }
     }
 }
@@ -99,44 +132,8 @@ fn count_card_ranks(hand: Vec<Card>) -> HashMap<Card, u32> {
     hand_count
 }
 
-
-fn strength(hand: &str) -> (u32, Vec<u32>) {
-    let mut numeric_hand: Vec<u32> = hand.chars().map(|c| {
-        if c == 'T' {10} 
-        else if c == 'J' {1}
-        else if c == 'Q' {12}
-        else if c == 'K' {13}
-        else if c == 'A' {14}
-        else {c.to_digit(10).unwrap()}
-    }).collect();
-    let mut counter = HashMap::new();
-
-    for n in &numeric_hand {
-        counter.entry(n).and_modify(|count| *count += 1).or_insert(1);
-    }
-
-    let mut sorted_values = counter.into_values().collect::<Vec<_>>();
-    sorted_values.sort();
-
-    if sorted_values == [5] {
-        return (10u32, numeric_hand)
-    } else if sorted_values == [1,4] {
-        return (9u32, numeric_hand)
-    } else if sorted_values == [2,3] {
-        return (8u32, numeric_hand)
-    } else if sorted_values == [1,1,3] {
-        return (7u32, numeric_hand)
-    } else if sorted_values == [1,2,2] {
-        return (6u32, numeric_hand)
-    } else if sorted_values == [1,1,1,2] {
-        return (5u32, numeric_hand)
-    } else {
-        return (4u32, numeric_hand)
-    }
-}
-
 fn part1(file_string: String) -> u32 {
-     // solution: 250232501
+     // solution: 250232501 (prod1)
     let file_lines_iter = file_string.split_terminator("\n");
     let mut hands = file_lines_iter.map(|line| {
         let parts: Vec<&str> =  line.split_whitespace().collect();
@@ -153,7 +150,6 @@ fn part1(file_string: String) -> u32 {
             rank_cmp
         }
     });
-    println!("Hands: {:?}", hands);
     let mut ans: u32 = 0;
     for (idx, (hand, bid)) in hands.iter().enumerate() {
         let ranking = 1 + idx as u32;
@@ -164,9 +160,36 @@ fn part1(file_string: String) -> u32 {
     ans
 }
 
-fn part2(file_string: String) -> &'static str {
-    "Not implemented"
+fn part2(file_string: String) -> u32 {
+     // solution: 5905 (test2)
+    // solution: 249138943 (prod2)
+    let file_lines_iter = file_string.split_terminator("\n");
+    let mut hands = file_lines_iter.map(|line| {
+        let parts: Vec<&str> =  line.split_whitespace().collect();
+        let cards = parts[0].chars().map(|c| Card::from_char(c).unwrap()).collect::<Vec<_>>();
+        let hand = Hand::from_hand(cards);
+        let bid = parts[1].parse::<u32>().unwrap();
+        (hand, bid)
+    }).collect::<Vec<_>>();
+    // TODO: Need to add the "Joker" logic -> since it can be anything, then I should just add them
+    // to the strongest hands
+    hands.sort_by(|a,b| {
+        let rank_cmp = a.0.cmp(&b.0);
+        if rank_cmp == std::cmp::Ordering::Equal {
+            a.1.cmp(&b.1)
+        } else {
+            rank_cmp
+        }
+    });
+    // println!("Hands: {:?}", hands);
+    let mut ans: u32 = 0;
+    for (idx, (hand, bid)) in hands.iter().enumerate() {
+        let ranking = 1 + idx as u32;
+        ans += bid * (ranking)
 
+    }
+
+    ans
 }
 pub fn solve(input_path: &str) -> SolutionPair{
     let file_string = file::read_file(input_path);
