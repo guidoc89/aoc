@@ -1,3 +1,3 @@
 pub fn solve (file_path: &str) {
-    println!("SOlution from 2023 day2 - Mode: {:?}", file_path);
+    println!("Solution from 2024 day3 - Mode: {:?}", file_path);
 }
