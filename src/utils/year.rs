@@ -34,8 +34,9 @@ fn match_day_in_year_2023(day: &str, input_path: String) -> SolutionPair {
         // "day5" => year2023::day5::day5::solve(&input_path),
         // "day6" => year2023::day6::day6::solve(&input_path),
         // "day7" => year2023::day7::day7::solve(&input_path),
-        "day8" => year2023::day8::day8::solve(&input_path),
-        "day9" => year2023::day9::day9::solve(&input_path),
+        // "day8" => year2023::day8::day8::solve(&input_path),
+        // "day9" => year2023::day9::day9::solve(&input_path),
+        "day10" => year2023::day10::day10::solve(&input_path),
         _ => panic!("Day not defined")
     }
 }
