@@ -1,4 +1,3 @@
-# lines, updates = open("../prod1.txt").read().strip().split("\n\n")
 
 from collections import defaultdict
 
