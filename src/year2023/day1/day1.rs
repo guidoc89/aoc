@@ -6,7 +6,7 @@ use crate::utils::solution::{SolutionPair, Solution};
 fn part1(file_string: String) -> i32 {
    let final_lines: Vec<_> = file_string
         .split_terminator("\n")
-        .map(|line| 
+        .map(|line|
         line.chars().filter(|c| c.is_digit(10)).collect::<Vec<char>>())
         .collect();
 
