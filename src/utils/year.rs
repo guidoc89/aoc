@@ -48,6 +48,7 @@ fn match_day_in_year_2024(day: &str, input_path: String) -> SolutionPair {
         "day3" => year2024::day3::day3::solve(&input_path),
         "day4" => year2024::day4::day4::solve(&input_path),
         "day5" => year2024::day5::day5::solve(&input_path),
+        "day6" => year2024::day6::day6::solve(&input_path),
         _ => panic!("Day not defined")
     }
 }
