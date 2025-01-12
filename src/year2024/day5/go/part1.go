@@ -9,59 +9,55 @@ import (
 )
 
 func main() {
-    var rawPages []string
     var ans int
-    var rawUpdates []string
     blocks := make([]string, 2)
     hm := make(map[int][]int)
-    
 
     file, _ := os.ReadFile("../prod1.txt")
     blocks = strings.Split(string(file), "\n\n")
 
-    rawPages = strings.Split(blocks[0], "\n")
-    rawUpdates = strings.Split(blocks[1], "\n")
-
-    for _, page := range rawPages {
-        nums := strings.Split(page, "|")
-        parsedNums := make([]int,len(nums))
-
-        for i, n := range nums {
-            parsedNums[i], _ = strconv.Atoi(n)
-        }
-
-        hm[parsedNums[0]] = append(hm[parsedNums[0]], parsedNums[1])
+    for _, page := range strings.Split(blocks[0], "\n") {
+        fields := strings.Split(page, "|")
+        nums := parseInts(fields)
+        hm[nums[0]] = append(hm[nums[0]], nums[1])
     }
 
-    for _, rawUpdate := range rawUpdates {
-        correct := true
+    for _, rawUpdate := range strings.Split(blocks[1], "\n") {
         rawFields := strings.Split(rawUpdate, ",")
-        update := make([]int, len(rawFields))
-        for i, c := range rawFields {
-            update[i], _ = strconv.Atoi(c)
-        }
+        update := parseInts(rawFields)
 
-        for i, x := range update {
-            for j, y := range update {
-                if i < j {
-                    // Check if X exists in the hm, and then check if y is not present in the slice
-                    // NOTE: indexing the key return "exists" as boolean (not err!!)
-                    if nums, exists := hm[x]; exists  {
-                        if !slices.Contains(nums, y) {
-                            correct = false
-                            break
-                        }
-                    } else {
-                        correct = false
-                        break
-                    }
-                }
-            }
-        }
-        if correct {
+        if isCorrect(update, hm) {
             ans += update[len(update) / 2]
         }
     }
-    fmt.Printf("Ans: %d", ans)
 
+    fmt.Printf("Ans: %d", ans)
+}
+
+func parseInts(fields []string) []int {
+    nums := make([]int, len(fields))
+    for i, f := range fields {
+        nums[i], _ = strconv.Atoi(f)
+    }
+
+    return nums
+}
+
+func isCorrect(update []int, hm map[int][]int) bool {
+    for i, x := range update {
+        for j, y := range update {
+            if j > i {
+                if nums, exists := hm[x]; exists {
+                    if !slices.Contains(nums, y) {
+                        return false
+                    }
+                } else {
+                    return false
+                }
+
+            }
+        }
+    }
+
+    return true
 }
