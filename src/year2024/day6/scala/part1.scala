@@ -1,6 +1,8 @@
 import scala.util.control.Breaks._
 import scala.collection.mutable.HashSet
 
+@main def part1(): Int = {
+  var lines = scala.io.Source.fromFile("../prod1.txt").getLines().toArray
   var grid = lines.map(_.split("").toArray)
   var ans: Int = 0
 
