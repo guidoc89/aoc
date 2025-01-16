@@ -6,18 +6,18 @@
   for (line <- lines) {
     var safe: Boolean = false
     val nums = line.split(" +").map(_.toInt).toList
-    if (Helpers.is_safe(nums)) {
+    if (Helpers.isSafe(nums)) {
       safe = true
     } else {
       for (i <- 0 until nums.length) {
         val new_nums = nums.slice(0,i) ++ nums.slice(i+1,nums.length)
-        if (Helpers.is_safe(new_nums)) {
+        if (Helpers.isSafe(new_nums)) {
           safe = true
         }
       }
     }
 
-    if (safe) {
+    if (Helpers.isSafe) {
       ans += 1
     }
   }
@@ -27,7 +27,7 @@
 
 
 object Helpers {
-  def is_safe(nums: List[Int]): Boolean = {
+  def isSafe(nums: List[Int]): Boolean = {
     var allPositive = true
     var allNegative = true
     var maxThree = true

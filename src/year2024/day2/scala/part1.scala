@@ -6,7 +6,7 @@
   for (line <- lines) {
     val nums = line.split(" +").map(_.toInt).toList
 
-    if (Helpers.is_safe(nums)) {
+    if (Helpers.isSafe(nums)) {
       println("Is safe!")
       ans += 1
     }
@@ -17,7 +17,7 @@
 
 
 object Helpers {
-  def is_safe(nums: List[Int]): Boolean = {
+  def isSafe(nums: List[Int]): Boolean = {
     var allPositive = true
     var allNegative = true
     var maxThree = true
